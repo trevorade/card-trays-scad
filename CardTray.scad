@@ -1,10 +1,7 @@
 // TODO
-// 1. Experiment with minkowski (see about replacing bowl_thing)
-// 2. Make the bowl trays cut off at y = sin(45 deg) for ease in printing
 // 3. Split vertically for trays with tokens (no point in the angled split)
 // 4. Consider reducing filament along the back of the walls
-// 5. Consider versioning the code.
-// 6. Convert HOLDERS to a list of items and use functions to create different ones.
+// 5. Convert HOLDERS to a list of items and use functions to create different ones.
 I_CARD_HOLDER = 1;
 P_CH_NUM_CARDS = 1;
 // Item Card Holder
@@ -38,10 +35,11 @@ TOP_R = 3;
 
 SPLIT = true;
 ONLY_FRONT = false; // false being "only back"
-$fn = 9; // 36 or higher for print...
+
+$fn = 18; // 36 or higher for print...
 
 // NON-CARD SPECIAL CONFIGURATION
-SPECIAL = false;
+// SPECIAL = false;
 
 // EXPANSIONS
 
@@ -118,49 +116,29 @@ FIRST_EXTRA = min(
 //translate([0, 0, 70])
 //cube([TOTAL_W, TOTAL_D, 2]);
 
-
 difference() {
   union() {
-    // Wall stuff
-    color("pink", 0.125)
     difference() {
-      union() {
-        if (SPECIAL == false) {
-          // Back cap rear
-          CAP_R = 10;
-          translate([0, TOTAL_D - WALL_D - CAP_R, CAP_R + BOTTOM_H])
-          rotate([0, 90, 0])
-          cylCap(TOTAL_W, CAP_R, 180);
-        }
+      // Full wall.
+      sideRoundedCube(TOTAL_W, TOTAL_D, TOTAL_H, ROUNDED_CORNER);
 
-        difference() {
-          // Full wall.
-          cube([TOTAL_W, TOTAL_D, TOTAL_H]);
-
-          // Cut out inner section.
-          translate([WALL_D, FIRST_WALL_D, BOTTOM_H])
-          cube([TOTAL_W - WALL_D * 2, TOTAL_D - WALL_D - FIRST_WALL_D, TOTAL_H - BOTTOM_H + .1]);
-        };
-      };
-
-      // Outside wall rounder corners
-      union() {
-        cylCap(TOTAL_H, ROUNDED_CORNER, 0);
-        translate([TOTAL_W - ROUNDED_CORNER, TOTAL_D - ROUNDED_CORNER, 0])
-        cylCap(TOTAL_H, ROUNDED_CORNER, 180);
-        translate([0, TOTAL_D - ROUNDED_CORNER, 0])
-        cylCap(TOTAL_H, ROUNDED_CORNER, 270);
-        translate([TOTAL_W - ROUNDED_CORNER, ROUNDED_CORNER*0, 0])
-        cylCap(TOTAL_H, ROUNDED_CORNER, 90);
-      };
+      // Cut out inner section.
+      translate([WALL_D, FIRST_WALL_D, BOTTOM_H])
+      cube([TOTAL_W - WALL_D * 2, TOTAL_D - WALL_D - FIRST_WALL_D, TOTAL_H - BOTTOM_H + .1]);
     };
 
     if (SPECIAL == false) {
+      // Back cap rear
+      CAP_R = 10;
+      translate([0, TOTAL_D - WALL_D - CAP_R, CAP_R + BOTTOM_H])
+      rotate([0, 90, 0])
+      cylCap(TOTAL_W, CAP_R, 180);
+
       // Divider before first holder...
       translate([WALL_D, 0, BOTTOM_H])
       difference() {
         union() {
-          translate([0, FIRST_WALL_D-DIV_D - FIRST_EXTRA, 0])
+          translate([0, FIRST_WALL_D - DIV_D - FIRST_EXTRA, 0])
           cardDivider();
 
           difference() {
@@ -465,36 +443,118 @@ module square_ring (w, d, r) {
   };
 }
 
+// All sides, edges, and corners are rounded.
+module fullyRoundedCube(w, d, h, r) {
+  minkowski() {
+    translate([r, r, r])
+    cube([w - r * 2, d - r * 2, h - r * 2]);
+
+    sphere(r);
+  };
+}
+
+// Top and bottom are flat.
+module sideRoundedCube(w, d, h, r) {
+  minkowski() {
+    translate([r, r, r / 2])
+    cube([w - r * 2, d - r * 2, h - r]);
+
+    cylinder(h = r, r = r, center = true);
+  };
+}
+
 module bowl_thing (w, d, h, r) {
-  // Blocky inner parts
-  translate([0, r, r])
-  cube([w, d - r*2, h - r]);
+  minkowski() {
+    translate([r, r, r])
+    cube([w - r * 2, d - r * 2, h - r]);
 
-  translate([r, 0, r])
-  cube([w - r*2, d, h - r]);
+    difference() {
+      sphere(r);
 
-  translate([r, r, 0])
-  cube([w - r*2, d - r*2, h]);
+      translate([-r*2, -r*2, 0])
+      cube([r*4, r*4, r*2]);
+    };
+  };
+}
 
-  // Rottom ring
-  square_ring(w, d, r);
+/**
+ * @param {number} w Width
+ * @param {number} d Depth
+ * @param {number} h Height
+ * @param {=number} or Outside radius
+ * @param {=number} wt Wall thickness
+ * @param {=number} bt Bottom thickness
+ */
+module grippy_bowl(w, d, h, or = 10, wt = 5, bt = 2) {
+  ir = or - wt; // Inside radius
+  tr = wt / 2; // Top radius
+  gs = d / 5; // Grippy size
 
-  // Edge upright cylinders
-  translate([r, r, r])
-  rotate([0, 0, 90])
-  cylinder(h - r, r, r);
+  // Make the model easier to print by clipping the bottom.
+  botClipH = sin(25) * or;
 
-  translate([w - r, r, r])
-  rotate([0, 0, 90])
-  cylinder(h - r, r, r);
+  // Outside shell
+  translate([0, 0, -botClipH])
+  difference() {
+    difference() {
+      bowl_thing(w, d, botClipH + h - tr, or);
 
-  translate([r, d-r, r])
-  rotate([0, 0, 90])
-  cylinder(h - r, r, r);
+      translate([wt, wt, botClipH + bt])
+      bowl_thing(w - wt*2, d - wt*2, botClipH + h, ir);
+    };
 
-  translate([w - r, d - r, r])
-  rotate([0, 0, 90])
-  cylinder(h - r, r, r);
+    cube([w, d, botClipH]);
+  };
+
+  translate([0, 0, h - tr]) {
+    translate([or, or, 0])
+    rotate([0, 0, 180])
+    rotate_extrude(angle = 90)
+    translate([or - tr, 0])
+    circle(tr);
+
+    translate([w - or, d - or, 0])
+    rotate_extrude(angle = 90)
+    translate([or - tr, 0])
+    circle(tr);
+
+    translate([or, d-or, 0])
+    rotate([0, 0, 90])
+    rotate_extrude(angle = 90)
+    translate([or - tr, 0])
+    circle(tr);
+
+    translate([w-or, or, 0])
+    rotate([0, 0, 270])
+    rotate_extrude(angle = 90)
+    translate([or - tr, 0])
+    circle(tr);
+
+
+    translate([or, tr, 0])
+    rotate([0, 90, 0])
+    cylinder(w - or * 2, tr, tr);
+
+    translate([or, d - tr, 0])
+    rotate([0, 90, 0])
+    cylinder(w - or * 2, tr, tr);
+
+    translate([tr, or, 0])
+    rotate([-90, 0, 0])
+    cylinder(d - or * 2, tr, tr);
+
+    translate([w - tr, or, 0])
+    rotate([-90, 0, 0])
+    cylinder(d - or * 2, tr, tr);
+  };
+
+  translate([tr, d / 2, h - tr])
+  rotate([90, 0, 90]) {
+    cylinder(wt, gs, gs, center = true);
+    rotate_extrude(angle = 180)
+    translate([gs, 0])
+    circle(tr);
+  };
 }
 
 module shearAlongZ(p) {

@@ -1,152 +1,97 @@
-W = 65;  // Width
-D = 55;  // Depth
-H = 20;  // Height
-OR = 7;  // Outside radius
-WT = 5;  // Wall thickness
-BT = 2;  // Bottom thickness
-
-// Computed values
-IR = OR - WT;
-TR = WT / 2;
-GS = D / 5; // Grippy size
-
 $fn = 36;
 
-//translate([0, D + 15, 0])
-//color("blue", 0.25)
-//cube([W, 5, H]);
-//translate([W + 15, 0, 0])
-//color("blue", 0.25)
-//cube([5, D, H]);
+grippy_bowl(65, 55, 20);
 
-// non-centered sphere.
-module ball (r) {
-  translate([r, r, r])
-  sphere(r);
-}
+/**
+ * @param {number} w Width
+ * @param {number} d Depth
+ * @param {number} h Height
+ * @param {=number} or Outside radius
+ * @param {=number} wt Wall thickness
+ * @param {=number} bt Bottom thickness
+ */
+module grippy_bowl(w, d, h, or = 10, wt = 5, bt = 2) {
+  ir = or - wt; // Inside radius
+  tr = wt / 2; // Top radius
+  gs = d / 5; // Grippy size
 
-module square_ring (w, d, r) {
-  // Corners
-  translate([0, 0, 0]) ball(r);
-  translate([w-r*2, 0, 0]) ball(r);
-  translate([0, d-r*2, 0]) ball(r);
-  translate([w-r*2, d-r*2, 0]) ball(r);
+  // Make the model easier to print by clipping the bottom.
+  botClipH = sin(25) * or;
 
-  // Edges
-  ew = w-r*2;
-  ed = d-r*2;
-  translate([0, 0, r]) {
-    translate([r, r, 0])
-    rotate([-90, 0, 0])
-    cylinder(ed, r, r);
-    translate([w-r, r, 0])
-    rotate([-90, 0, 0])
-    cylinder(ed, r, r);
-    translate([r, r, 0])
+  // Outside shell
+  translate([0, 0, -botClipH])
+  difference() {
+    difference() {
+      bowl_thing(w, d, botClipH + h - tr, or);
+
+      translate([wt, wt, botClipH + bt])
+      bowl_thing(w - wt*2, d - wt*2, botClipH + h, ir);
+    };
+
+    cube([w, d, botClipH]);
+  };
+
+  translate([0, 0, h - tr]) {
+    translate([or, or, 0])
+    rotate([0, 0, 180])
+    rotate_extrude(angle = 90)
+    translate([or - tr, 0])
+    circle(tr);
+
+    translate([w - or, d - or, 0])
+    rotate_extrude(angle = 90)
+    translate([or - tr, 0])
+    circle(tr);
+
+    translate([or, d-or, 0])
+    rotate([0, 0, 90])
+    rotate_extrude(angle = 90)
+    translate([or - tr, 0])
+    circle(tr);
+
+    translate([w-or, or, 0])
+    rotate([0, 0, 270])
+    rotate_extrude(angle = 90)
+    translate([or - tr, 0])
+    circle(tr);
+
+
+    translate([or, tr, 0])
     rotate([0, 90, 0])
-    cylinder(ew, r, r);
-    translate([r, d-r, 0])
+    cylinder(w - or * 2, tr, tr);
+
+    translate([or, d - tr, 0])
     rotate([0, 90, 0])
-    cylinder(ew, r, r);
+    cylinder(w - or * 2, tr, tr);
+
+    translate([tr, or, 0])
+    rotate([-90, 0, 0])
+    cylinder(d - or * 2, tr, tr);
+
+    translate([w - tr, or, 0])
+    rotate([-90, 0, 0])
+    cylinder(d - or * 2, tr, tr);
+  };
+
+  translate([tr, d / 2, h - tr])
+  rotate([90, 0, 90]) {
+    cylinder(wt, gs, gs, center = true);
+    rotate_extrude(angle = 180)
+    translate([gs, 0])
+    circle(tr);
   };
 }
 
-module bowl_thing (w, d, h, r) {
-  // Blocky inner parts
-  translate([0, r, r])
-  cube([w, d - r*2, h - r]);
+module bowl_thing(w, d, h, r) {
+  minkowski() {
+    translate([r, r, r])
+    cube([w - r * 2, d - r * 2, h - r]);
 
-  translate([r, 0, r])
-  cube([w - r*2, d, h - r]);
+    difference() {
+      sphere(r);
 
-  translate([r, r, 0])
-  cube([w - r*2, d - r*2, h]);
-
-  // Rottom ring
-  square_ring(w, d, r);
-
-  // Edge upright cylinders
-  translate([r, r, r])
-  rotate([0, 0, 90])
-  cylinder(h - r, r, r);
-
-  translate([w - r, r, r])
-  rotate([0, 0, 90])
-  cylinder(h - r, r, r);
-
-  translate([r, d-r, r])
-  rotate([0, 0, 90])
-  cylinder(h - r, r, r);
-
-  translate([w - r, d - r, r])
-  rotate([0, 0, 90])
-  cylinder(h - r, r, r);
+      translate([-r * 2, -r * 2, 0])
+      cube([r * 4, r * 4, r * 2]);
+    };
+  };
 }
-
-// Outside shell
-color("green", 0.4) {
-  difference() {
-    bowl_thing(W, D, H - TR, OR);
-
-    translate([WT, WT, BT])
-    bowl_thing(W - WT*2, D - WT*2, H, IR);
-  }
-};
-
-translate([0, 0, H-TR])
-color("yellow", 0.5) {
-  translate([OR, OR, 0])
-  rotate([0, 0, 180])
-  rotate_extrude(angle=90)
-    translate([OR-TR, 0]) circle(TR);
-  
-  translate([W-OR, D-OR, 0])
-  rotate_extrude(angle=90)
-    translate([OR-TR, 0]) circle(TR);
-  
-  translate([OR, D-OR, 0])
-  rotate([0, 0, 90])
-  rotate_extrude(angle=90)
-    translate([OR-TR, 0]) circle(TR);
-
-  translate([W-OR, OR, 0])
-  rotate([0, 0, 270])
-  rotate_extrude(angle=90)
-    translate([OR-TR, 0]) circle(TR);
-
-
-  translate([OR, TR, 0])
-  rotate([0, 90, 0])
-  cylinder(W - OR*2, TR, TR);
-
-  translate([OR, D-TR, 0])
-  rotate([0, 90, 0])
-  cylinder(W - OR*2, TR, TR);
-  
-  translate([TR, OR, 0])
-  rotate([-90, 0, 0])
-  cylinder(D - OR*2, TR, TR);
-  
-  translate([W-TR, OR, 0])
-  rotate([-90, 0, 0])
-  cylinder(D - OR*2, TR, TR);
-};
-
-
-translate([TR, D/2, H-TR])
-rotate([90, 0, 90]) {
-cylinder(WT, GS, GS, center=true);
-rotate_extrude(angle=180)
-  translate([GS, 0]) circle(TR);
-};
-
-//eps = 0.01;
-//translate([eps, 60, 0])
-//scale([1, 1, .25])
-//   rotate_extrude(angle=180, convexity=10)
-//       translate([40, 0]) circle(10);
-//rotate_extrude(angle=90, convexity=10)
-//   translate([20, 0]) circle(10);
-//translate([20, eps, 0])
-//   rotate([90, 0, 0]) cylinder(r=10, h=80+eps);
-
