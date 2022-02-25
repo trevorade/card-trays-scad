@@ -1,3 +1,5 @@
+use <RoundedCube.scad>;
+
 // TODO
 // 3. Split vertically for trays with tokens (no point in the angled split)
 // 4. Consider reducing filament along the back of the walls
@@ -33,10 +35,10 @@ HOLE_R = 12;
 HOLE_SCALE = .66;
 TOP_R = 3;
 
-SPLIT = true;
+SPLIT = false;
 ONLY_FRONT = false; // false being "only back"
 
-$fn = 18; // 36 or higher for print...
+$fn = 36; // 36 or higher for print...
 
 // NON-CARD SPECIAL CONFIGURATION
 // SPECIAL = false;
@@ -171,15 +173,13 @@ difference() {
       CAP_R = 6.5;
 
       MAT_D = 1.16666666667;
-      MAT_ANGLE = 41;
+      MAT_ANGLE = 49;
       MAT_ANGLED_D = MAT_D / cos(MAT_ANGLE);
       MAT_CNT = 7; // 6 + some wiggle room
       MAT_W = 128 + 4;
       MAT_H = 84;
       MAT_X_PAD = 0;
       MAT_Y_PAD = 12;
-      MAT_CLIP_SIZE = MAT_D * 3;
-      MAT_CLIP_DROP_Z = 5; // Trig fails me...
 
       translate([WALL_D, WALL_D, BOTTOM_H])
       difference() {
@@ -191,7 +191,7 @@ difference() {
         union() {
           // Major bowl indentation
           translate([0, 0, INNER_H])
-          bowl_thing(WIDTH, INNER_D, INNER_H, CAP_R);
+          bowlCube(WIDTH, INNER_D, INNER_H, CAP_R);
 
           TRAY_BOWL_R = 5;
 
@@ -201,7 +201,7 @@ difference() {
           COIN_B_H = 20;
           COIN_B_Y = MAT_Y_PAD + MAT_W + 32;
           translate([(WIDTH - COIN_B_W) / 2, COIN_B_Y, INNER_H - COIN_B_H])
-          bowl_thing(COIN_B_W, COIN_B_D, INNER_H, TRAY_BOWL_R);
+          bowlCube(COIN_B_W, COIN_B_D, INNER_H, TRAY_BOWL_R);
 
           // Cubes bowl
           CUBES_B_W = 45;
@@ -209,30 +209,13 @@ difference() {
           CUBES_B_H = 20;
           CUBES_B_Y = COIN_B_Y + COIN_B_D + 14;
           translate([(WIDTH - CUBES_B_W) / 2, CUBES_B_Y, INNER_H - CUBES_B_H])
-          bowl_thing(CUBES_B_W, CUBES_B_D, INNER_H, TRAY_BOWL_R);
+          bowlCube(CUBES_B_W, CUBES_B_D, INNER_H, TRAY_BOWL_R);
 
           matTotalD = MAT_D * MAT_CNT;
           matAngledTotalD = MAT_ANGLED_D * MAT_CNT;
 
-          translate([MAT_X_PAD, MAT_Y_PAD, 0])
-          union() {
-            // Holder slot.
-            translate([matAngledTotalD, 0, 0])
-            difference() {
-              // Slot inside
-              rotate([0, MAT_ANGLE, 0])
-              translate([-matTotalD, 0, -MAT_H])
-              cube([matTotalD, MAT_W, MAT_H * 2]);
-
-              // Cut off the bottom so it's flat.
-              translate([-MAT_H * 5, -MAT_H * 5, -MAT_H * 10])
-              cube([MAT_H * 10, MAT_H * 10, MAT_H * 10]);
-            };
-
-            // Clip: Flat part on top for ease of storage.
-            translate([INNER_H / tan(90 - MAT_ANGLE) - MAT_CLIP_SIZE, 0, INNER_H - MAT_CLIP_DROP_Z])
-            cube([MAT_CLIP_SIZE * 2, MAT_W, MAT_H]);
-          };
+          translate([MAT_X_PAD, MAT_Y_PAD, .05])
+          roundedSlot(MAT_D * MAT_CNT, MAT_W, INNER_H, MAT_ANGLE, /* smoothR= */ 5);
         };
       };
     }
@@ -411,72 +394,6 @@ module cylCap(h, r, a) {
   };
 }
 
-// non-centered sphere.
-module ball (r) {
-  translate([r, r, r])
-  sphere(r);
-}
-
-module square_ring (w, d, r) {
-  // Corners
-  translate([0, 0, 0]) ball(r);
-  translate([w-r*2, 0, 0]) ball(r);
-  translate([0, d-r*2, 0]) ball(r);
-  translate([w-r*2, d-r*2, 0]) ball(r);
-
-  // Edges
-  ew = w-r*2;
-  ed = d-r*2;
-  translate([0, 0, r]) {
-    translate([r, r, 0])
-    rotate([-90, 0, 0])
-    cylinder(ed, r, r);
-    translate([w-r, r, 0])
-    rotate([-90, 0, 0])
-    cylinder(ed, r, r);
-    translate([r, r, 0])
-    rotate([0, 90, 0])
-    cylinder(ew, r, r);
-    translate([r, d-r, 0])
-    rotate([0, 90, 0])
-    cylinder(ew, r, r);
-  };
-}
-
-// All sides, edges, and corners are rounded.
-module fullyRoundedCube(w, d, h, r) {
-  minkowski() {
-    translate([r, r, r])
-    cube([w - r * 2, d - r * 2, h - r * 2]);
-
-    sphere(r);
-  };
-}
-
-// Top and bottom are flat.
-module sideRoundedCube(w, d, h, r) {
-  minkowski() {
-    translate([r, r, r / 2])
-    cube([w - r * 2, d - r * 2, h - r]);
-
-    cylinder(h = r, r = r, center = true);
-  };
-}
-
-module bowl_thing (w, d, h, r) {
-  minkowski() {
-    translate([r, r, r])
-    cube([w - r * 2, d - r * 2, h - r]);
-
-    difference() {
-      sphere(r);
-
-      translate([-r*2, -r*2, 0])
-      cube([r*4, r*4, r*2]);
-    };
-  };
-}
-
 /**
  * @param {number} w Width
  * @param {number} d Depth
@@ -497,10 +414,10 @@ module grippy_bowl(w, d, h, or = 10, wt = 5, bt = 2) {
   translate([0, 0, -botClipH])
   difference() {
     difference() {
-      bowl_thing(w, d, botClipH + h - tr, or);
+      bowlCube(w, d, botClipH + h - tr, or);
 
       translate([wt, wt, botClipH + bt])
-      bowl_thing(w - wt*2, d - wt*2, botClipH + h, ir);
+      bowlCube(w - wt*2, d - wt*2, botClipH + h, ir);
     };
 
     cube([w, d, botClipH]);

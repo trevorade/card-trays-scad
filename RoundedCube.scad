@@ -1,30 +1,73 @@
-$fn = 18;
+$fn = 36;
 
-mR = 2;
+MAT_D = 1.16666666667;
+// MAT_ANGLED_D = MAT_D / cos(MAT_ANGLE);
+MAT_CNT = 15; // 7; 6 + some wiggle room
 
-// Adding rounded edges to cutting out a mat slot
+slotW = MAT_D * MAT_CNT; // Pre-rotation slot width
+slotA = 49; // 49
+slotD = 128 + 4;
+slotH = 84;
+slotClipW = 20;// MAT_D * 5;
+smoothR = 10;
 
-translate([-45, 0, 0])
-color("red", 0.25)
-difference() {
-  translate([mR, mR, mR])
-  minkowski() {
-    difference() {
-      cube([40 -mR*2, 30-mR*2, 20 -mR*2]);
-      
-      translate([10+mR / cos(-45), 10 - mR*2, 1])
-      rotate([0, -45, 0])
-      cube([40+ mR * 2, 10+ mR * 2, 10+ mR * 2]);
+roundedSlot(slotW, slotD, slotH, slotA, smoothR, slotClipW);
+
+function roundedSlotW(slotW, slotH, slotA) = slotH / tan(slotA) + slotW / cos(90 - slotA);
+
+module roundedSlot(slotW, slotD, slotH, slotA, smoothR, slotClipW = 0) {
+  totalW = roundedSlotW(slotW, slotH, slotA);
+  angledExtra = smoothR / cos(90 - slotA);
+
+  clipH = slotClipW * tan(slotA);
+  clipZ = slotH - clipH;
+  slotTopX = slotH / tan(slotA);
+  clipX = slotTopX - slotClipW;
+
+  Z = .0001; // A bit more than zero.
+
+  difference() {
+    translate([- Z, -smoothR - Z, 0])
+    cube([Z + totalW + smoothR/2, slotD + smoothR * 2 + Z * 2, slotH]);
+
+    union() {
+      minkowski() {
+        difference() {
+          translate([-totalW / 2, -slotD / 2, -slotH - smoothR])
+          cube([totalW * 2, slotD * 2, slotH * 2]);
+
+          union() {
+            color("green", 0.25)
+            difference() {
+              translate([-angledExtra, -smoothR, 0])
+              rotate([0, 90 - slotA, 0])
+              translate([0, 0, -slotH*250])
+              cube([slotW + smoothR * 2, slotD + smoothR * 2, slotH * 1000]);
+
+              union() {
+                translate([-slotD * 2, -slotD * 2, -slotD * 2-smoothR])
+                cube([slotD * 4, slotD * 4, slotD * 2]);
+                translate([-slotD * 2, -slotD * 2, slotH])
+                cube([slotD * 4, slotD * 4, slotD * 2]);
+              };
+            };
+
+            color("red", 0.25)
+            translate([clipX - smoothR, -smoothR, clipZ - smoothR])
+            cube([slotClipW + Z + smoothR, slotD + smoothR * 2, clipH * 2 ]);
+          };
+        };
+
+        sphere(smoothR);
+      };
+
+      // The top cut-off
+      cutOffX = min(clipX - smoothR, slotTopX - (smoothR + smoothR / sin(90 - slotA)) / tan(slotA));
+      translate([-1, -slotD, slotH - 1])
+      cube([cutOffX + 1, slotD * 3, 8]);
     };
-
-    sphere(mR);
   };
-
-  // Cut out the bottom
-  translate([10, 10, 1])
-  rotate([0, -45, 0])
-  cube([40, 10, 10]);
-};
+}
 
 // All sides, edges, and corners are rounded.
 module fullyRoundedCube(w, d, h, r) {
@@ -79,5 +122,37 @@ module square_ring (w, d, r) {
     };
 
     sphere(r);
+  };
+}
+
+// non-centered sphere.
+module ball (r) {
+  translate([r, r, r])
+  sphere(r);
+}
+
+module square_ring (w, d, r) {
+  // Corners
+  translate([0, 0, 0]) ball(r);
+  translate([w-r*2, 0, 0]) ball(r);
+  translate([0, d-r*2, 0]) ball(r);
+  translate([w-r*2, d-r*2, 0]) ball(r);
+
+  // Edges
+  ew = w-r*2;
+  ed = d-r*2;
+  translate([0, 0, r]) {
+    translate([r, r, 0])
+    rotate([-90, 0, 0])
+    cylinder(ed, r, r);
+    translate([w-r, r, 0])
+    rotate([-90, 0, 0])
+    cylinder(ed, r, r);
+    translate([r, r, 0])
+    rotate([0, 90, 0])
+    cylinder(ew, r, r);
+    translate([r, d-r, 0])
+    rotate([0, 90, 0])
+    cylinder(ew, r, r);
   };
 }
