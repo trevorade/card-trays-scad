@@ -23,15 +23,15 @@ SEASIDE_2E = 13;
 
 // Which expansion to export.
 EXPANSION = RENAISSANCE;
-// Which tray to print (0, 1, 2 or 3).
-TRAY = 3;
+// Which tray to print (1-4).
+TRAY = 1;
 // Only models the front half of the tray. Model the back with `false`.
-ONLY_FRONT = false;
+ONLY_FRONT = true;
 // Only models a single bucket corresponding to an item index (starting with 0).
 // `false` to print the tray as per normal
 ONLY_BUCKET = false;
 // Overall quality. Use 36 or higher when rendering before exporting the STL.
-$fn = 18;
+$fn = 36;
 
 
 // Global object settings.
@@ -215,66 +215,68 @@ FIRST_WALL_D = [
 // Items are front to back which is typically the reverse of how you'll want
 // to organize cards so keep that in mind.
 ITEMS = [
-  undef, // BASE_2E tray 0
   undef, // BASE_2E tray 1
   undef, // BASE_2E tray 2
   undef, // BASE_2E tray 3
-  undef, // INTRIGUE_2E tray 0
+  undef, // BASE_2E tray 4
   undef, // INTRIGUE_2E tray 1
   undef, // INTRIGUE_2E tray 2
   undef, // INTRIGUE_2E tray 3
-  undef, // SEASIDE_1E tray 0
+  undef, // INTRIGUE_2E tray 4
   undef, // SEASIDE_1E tray 1
   undef, // SEASIDE_1E tray 2
   undef, // SEASIDE_1E tray 3
-  undef, // PROSPERITY tray 0
+  undef, // SEASIDE_1E tray 4
   undef, // PROSPERITY tray 1
   undef, // PROSPERITY tray 2
   undef, // PROSPERITY tray 3
-  undef, // HINTERLANDS tray 0
+  undef, // PROSPERITY tray 4
   undef, // HINTERLANDS tray 1
   undef, // HINTERLANDS tray 2
   undef, // HINTERLANDS tray 3
-  // DARK_AGES tray 0
-  [iCH(12), iCH(10), iCH(11), iCH(10), iCH(10), splitAfter(iCH(10)), iCH(10), iCH(10), iCH(10), iCH(10), iCH(10)],
+  undef, // HINTERLANDS tray 4
   // DARK_AGES tray 1
+  [iCH(12), iCH(10), iCH(11), iCH(10), iCH(10), iCH(10), splitAfter(iCH(10)), iCH(10), iCH(10), iCH(10), iCH(10)],
+  // DARK_AGES tray 2
   [iCH(10), iCH(10), iCH(11), iCH(10), iCH(10), splitAfter(iCH(10)), iCH(20), iCH(10), iCH(10), iCH(10)],
-  undef, // DARK_AGES tray 2
   undef, // DARK_AGES tray 3
-  undef, // GLDS_AND_CRNCP tray 0
+  undef, // DARK_AGES tray 4
   undef, // GLDS_AND_CRNCP tray 1
   undef, // GLDS_AND_CRNCP tray 2
   undef, // GLDS_AND_CRNCP tray 3
-  undef, // ADVENTURES tray 0
+  undef, // GLDS_AND_CRNCP tray 4
   undef, // ADVENTURES tray 1
   undef, // ADVENTURES tray 2
   undef, // ADVENTURES tray 3
-  undef, // EMPIRES tray 0
+  undef, // ADVENTURES tray 4
   undef, // EMPIRES tray 1
   undef, // EMPIRES tray 2
   undef, // EMPIRES tray 3
-  undef, // NOCTURNE tray 0
+  undef, // EMPIRES tray 4
   undef, // NOCTURNE tray 1
   undef, // NOCTURNE tray 2
   undef, // NOCTURNE tray 3
-  undef, // RENAISSANCE tray 0
-  undef, // RENAISSANCE tray 1
-  undef, // RENAISSANCE tray 2
-  // RENAISSANCE tray 3
+  undef, // NOCTURNE tray 4
+  // RENAISSANCE tray 1
+  [iCH(10), iCH(10), iCH(10), iCH(10), iCH(11), splitAfter(iCH(10)), iCH(10), iCH(10), iCH(12), iCH(10)],
+  // RENAISSANCE tray 2
+  [iCH(10), iCH(10), iCH(10), iCH(10), iCH(10), splitAfter(iCH(10)), iCH(10), iCH(10), iCH(10), iCH(10)],
+  undef, // RENAISSANCE tray 3
+  // RENAISSANCE tray 4
   [splitAfter(iMH(84, 7/6, 127, 6)), iTB(60, 40, 25), iTB(60, 40, 25)],
-  undef, // MENAGERIE tray 0
   undef, // MENAGERIE tray 1
   undef, // MENAGERIE tray 2
   undef, // MENAGERIE tray 3
-  undef, // ALLIES tray 0
+  undef, // MENAGERIE tray 4
   undef, // ALLIES tray 1
   undef, // ALLIES tray 2
   undef, // ALLIES tray 3
-  undef, // SEASIDE_2E tray 0
+  undef, // ALLIES tray 4
   undef, // SEASIDE_2E tray 1
   undef, // SEASIDE_2E tray 2
   undef, // SEASIDE_2E tray 3
-][EXPANSION * 4 + TRAY];
+  undef, // SEASIDE_2E tray 4
+][EXPANSION * 4 + TRAY - 1];
 assert(ITEMS != undef, str(
   "Sorry. No presets for EXPANSION = ", EXPANSION,
   ", TRAY = ", TRAY,
@@ -343,7 +345,7 @@ E =
 assert(E >= 0, str(
   "Too many/deep items defined for EXPANSION = ", EXPANSION, ", TRAY = ", TRAY));
 
-if (ONLY_BUCKET == false) {
+if (false && ONLY_BUCKET == false) {
   difference() {
     union() {
       difference() {
@@ -438,9 +440,11 @@ if (ONLY_BUCKET == false) {
       };
     }
   };
-} else {
+} else if (false) {
   item = ITEMS[ONLY_BUCKET];
   grippy_bowl(item[P_TB_W], item[P_TB_D], item[P_TB_H]);
+} else {
+  card_divider();
 }
 
 // Iterative calculation of the necessary mat angle starting with a guess.
@@ -575,32 +579,33 @@ module card_divider() {
           [0, 3, 5, 4],
         ]);
 
-         // Card divider end cap.
-        translate([0, -DIV_BACK_Y, DIV_BACK_BOT_Z + DIV_CAP_R])
-        scale([1, .53, 1.04757])
-        difference() {
-          shearAlongZ([0, -.3, 1])
-          rotate([0, 90, 0])
-          cylinder(INNER_W, DIV_CAP_R, DIV_CAP_R);
+      // Card divider end cap.
+      translate([0, -DIV_BACK_Y, DIV_BACK_BOT_Z + DIV_CAP_R])
+      scale([1, .53, 1.04757])
+      difference() {
+        shearAlongZ([0, -.3, 1])
+        rotate([0, 90, 0])
+        cylinder(INNER_W, DIV_CAP_R, DIV_CAP_R);
 
-          rotate([0, 90, 0])
-          translate([-DIV_CAP_R*1.25, 0, -1])
-          cube([DIV_CAP_R * 2.5, DIV_CAP_R * 1.5, INNER_W * 2]);
-        };
+        // What is this for?
+        rotate([0, 90, 0])
+        translate([-DIV_CAP_R*1.25, 0, -1])
+        cube([DIV_CAP_R * 2.5, DIV_CAP_R * 1.5, INNER_W * 2]);
       };
+    };
 
+    // I want to move this up a bit...
     // Divider hole. 2.373
     translate([0, -DIV_D*2.3776, SPILL_Z])
     rotate([ANGLE - 90, 0, 0])
     difference() {
-      //translate([INNER_W - HOLE_W / 2, -SPILL_Y*4, SPILL_Z])
       union() {
         translate([(INNER_W - HOLE_W) / 2, -DIV_L, 0])
         cube([HOLE_W, DIV_L, DIV_D]);
 
         translate([INNER_W - (INNER_W - HOLE_W) / 2 -.0001, -DIV_L, 0])
         cylCap(DIV_D, TOP_R, 0);
-        
+
         translate([(INNER_W - HOLE_W) / 2-TOP_R, -DIV_L, 0])
         cylCap(DIV_D, TOP_R, 90);
       };
