@@ -1,4 +1,5 @@
 use <RoundedCube.scad>;
+use <bezier.scad>;
 
 // Expansion tray presets.
 // Note, many presets are missing at this moment (see the large ITEMS list below).
@@ -25,13 +26,14 @@ SEASIDE_2E = 13;
 EXPANSION = RENAISSANCE;
 // Which tray to print (1-4).
 TRAY = 1;
-// Only models the front half of the tray. Model the back with `false`.
+// Only models the front half of the tray. Model the back with `false`. Model
+// all with `undef`.
 ONLY_FRONT = true;
 // Only models a single bucket corresponding to an item index (starting with 0).
 // `false` to print the tray as per normal
 ONLY_BUCKET = false;
 // Overall quality. Use 36 or higher when rendering before exporting the STL.
-$fn = 36;
+$fn = 18;
 
 
 // Global object settings.
@@ -54,9 +56,8 @@ TOTAL_H = 40;
 INNER_H = 25;
 // Rounded edges around inner radius.
 INNER_R = 3;
-// Card-holder angle. A bit wonky as it starts with the object at 90 deg then
-// rotates from there. Excuse the weird math because of this.
-ANGLE = 51;
+// Card-holder angle.
+ANGLE = 39;
 // Total tray width. 72 is used for Dominion trays.
 TOTAL_W = 72;
 // Total tray depth. 288 is used for Dominion trays.
@@ -64,12 +65,14 @@ TOTAL_D = 288;
 
 // Vertical gap between top of wall and top of card divider.
 DIV_GAP_H = 1.8;
-// Divider wall depth.
+// Divider wall depth. This is the literal depth of the angled piece.
 DIV_D = 6;
 // Divider hole radius.
 HOLE_R = 12;
 // The divider hole width in relation to the total divider width
-HOLE_SCALE = .66;
+HOLE_SCALE_W = .66;
+// The divider hole height in relation to the angled divider height
+HOLE_SCALE_H = .71;
 // The divider hole rounded corner radius at the top.
 TOP_R = 3;
 // Minimum number of cards per holder. Impacts the spill-over height for cards.
@@ -86,20 +89,13 @@ TB_PAD = 1;
 // How much the token bucket will overflow over the top.
 TB_TOP_OVERFLOW = 5;
 
-CARD_ANGLED_D = CARD_D / cos(ANGLE);
-SPILL_Z = CARD_D * MIN_CARDS * sin(ANGLE);
+CARD_ANGLED_D = CARD_D / sin(ANGLE);
+SPILL_Z = CARD_D * MIN_CARDS * cos(ANGLE);
 INNER_W = TOTAL_W - WALL_D * 2;
 // Does not take into account front wall depth.
 INNER_D = TOTAL_D - WALL_D * 2;
-HOLE_W = INNER_W * HOLE_SCALE;
-
+HOLE_W = INNER_W * HOLE_SCALE_W;
 DIV_H = TOTAL_H - BOTTOM_H - DIV_GAP_H;
-DIV_BACK_Y = DIV_H * tan(ANGLE);
-DIV_BACK_BOT_Z = DIV_H - DIV_D / tan(ANGLE); // Points 2 + 6
-DIV_CAP_R = (DIV_H - DIV_BACK_BOT_Z) / 2;
-// I do not remember what this dark magic is...
-DIV_L = 1.13282*(DIV_H - SPILL_Z)/ sin(ANGLE);
-
 
 // "Classes" for various types of tray items.
 
@@ -118,17 +114,18 @@ function splitAfter(item) =
 // Item Card Holder
 I_CARD_HOLDER = 1;
 P_CH_NUM_CARDS = 2;
-function iCH(numCards) = [I_CARD_HOLDER, false, numCards];
+P_CH_INITIALS = 3;
+function iCH(numCards, initials = []) = [I_CARD_HOLDER, false, numCards, initials];
 
 function shouldClipCardHolderFront(i) =
   i == 0 || ITEMS[i - 1][P_I_TYPE] != I_CARD_HOLDER;
 
 function cardHolderSpillH(i) =
   let (numCards = ITEMS[i][P_CH_NUM_CARDS])
-    numCards > MIN_CARDS ? SPILL_Z : CARD_D * numCards * sin(ANGLE);
+    numCards > MIN_CARDS ? SPILL_Z : CARD_D * numCards * cos(ANGLE);
 
 function cardHolderSpillFrontD(i) =
-  cardHolderSpillH(i) / tan(90 - ANGLE);
+  cardHolderSpillH(i) / tan(ANGLE);
 
 // Item Mat Holder
 
@@ -164,7 +161,7 @@ function itemDepth(i) =
       TB_PAD * 2 + item[P_TB_D]
       :
       0
-  );
+  ); 
 
 function getSplitIndex(i = 0) =
   i >= len(ITEMS) ? undef : ITEMS[i][P_I_SPLIT_AFTER] ? i : getSplitIndex(i + 1);
@@ -211,10 +208,8 @@ FIRST_WALL_D = [
   false, // SEASIDE_2E
 ][EXPANSION] ? .4 * 3 : WALL_D;
 
-// Items that will be included in the model tray.
-// Items are front to back which is typically the reverse of how you'll want
-// to organize cards so keep that in mind.
-ITEMS = [
+// Items that will be included in the model tray. Back to front.
+EXPANSION_TRAY_ITEMS = [
   undef, // BASE_2E tray 1
   undef, // BASE_2E tray 2
   undef, // BASE_2E tray 3
@@ -258,7 +253,7 @@ ITEMS = [
   undef, // NOCTURNE tray 3
   undef, // NOCTURNE tray 4
   // RENAISSANCE tray 1
-  [iCH(10), iCH(10), iCH(10), iCH(10), iCH(11), splitAfter(iCH(10)), iCH(10), iCH(10), iCH(12), iCH(10)],
+  [iCH(10, ["A", "T"]), iCH(12, ["B", "G", "H", "L"]), iCH(10, ["C", "S"]), iCH(10, ["D"]), splitAfter(iCH(10, ["E"])), iCH(11, ["F", "B", "F"]), iCH(10, ["H"]), iCH(10, ["Im"]), iCH(10, ["In"]), iCH(10, ["L"])],
   // RENAISSANCE tray 2
   [iCH(10), iCH(10), iCH(10), iCH(10), iCH(10), splitAfter(iCH(10)), iCH(10), iCH(10), iCH(10), iCH(10)],
   undef, // RENAISSANCE tray 3
@@ -277,10 +272,14 @@ ITEMS = [
   undef, // SEASIDE_2E tray 3
   undef, // SEASIDE_2E tray 4
 ][EXPANSION * 4 + TRAY - 1];
-assert(ITEMS != undef, str(
+assert(EXPANSION_TRAY_ITEMS != undef, str(
   "Sorry. No presets for EXPANSION = ", EXPANSION,
   ", TRAY = ", TRAY,
   ". Consider defining a preset."));
+
+// We use front to back when rendering...
+function reverse(list) = [for (i = [len(list)-1:-1:0]) list[i]];
+ITEMS = reverse(EXPANSION_TRAY_ITEMS);
 
 
 // Renaissance Globals
@@ -345,7 +344,7 @@ E =
 assert(E >= 0, str(
   "Too many/deep items defined for EXPANSION = ", EXPANSION, ", TRAY = ", TRAY));
 
-if (false && ONLY_BUCKET == false) {
+if (ONLY_BUCKET == false) {
   difference() {
     union() {
       difference() {
@@ -365,8 +364,8 @@ if (false && ONLY_BUCKET == false) {
       if (ALL_CARDS) {
         firstNumCards = ITEMS[0][P_CH_NUM_CARDS];
         firstExtra = min(
-          (CARD_D * firstNumCards * sin(ANGLE)) / tan(90 - ANGLE),
-          SPILL_Z * tan(ANGLE)
+          (CARD_D * firstNumCards * cos(ANGLE)) / tan(ANGLE),
+          SPILL_Z * tan(90 - ANGLE)
         );
 
         translate([WALL_D, 0, BOTTOM_H])
@@ -386,7 +385,7 @@ if (false && ONLY_BUCKET == false) {
                 0,
                 FIRST_WALL_D + CARD_ANGLED_D * firstNumCards - firstExtra,
                 0])
-              rotate([-ANGLE, 0, 0])
+              rotate([ANGLE - 90, 0, 0])
               translate([0, -CARD_D * firstNumCards, -TOTAL_H])
               cube([INNER_W, CARD_D * firstNumCards, TOTAL_H * 2]);
             };
@@ -440,11 +439,11 @@ if (false && ONLY_BUCKET == false) {
       };
     }
   };
-} else if (false) {
-  item = ITEMS[ONLY_BUCKET];
-  grippy_bowl(item[P_TB_W], item[P_TB_D], item[P_TB_H]);
 } else {
   card_divider();
+  
+//  item = ITEMS[ONLY_BUCKET];
+//  grippy_bowl(item[P_TB_W], item[P_TB_D], item[P_TB_H]);
 }
 
 // Iterative calculation of the necessary mat angle starting with a guess.
@@ -498,12 +497,12 @@ module maybe_invert() {
 
 module holderMask() {
   topCardsZ = 6.5 * CARD_D * sin(ANGLE);
-  topCardsY = TOTAL_H * tan(ANGLE) - topCardsZ / tan(90 - ANGLE);
+  topCardsY = TOTAL_H * tan(90 - ANGLE) - topCardsZ / tan(ANGLE);
 
   difference() {
     union() {
       translate([0, -DIV_D / 2, BOTTOM_H])
-      rotate([-ANGLE, 0 ,0])
+      rotate([ANGLE - 90, 0 ,0])
       translate([0, -TOTAL_D * 4, -TOTAL_H * 16])
       cube([TOTAL_W, TOTAL_D * 4, TOTAL_H * 62]);
 
@@ -525,7 +524,7 @@ module holder(i) {
       difference() {
         // A big cube for the spill-top.
         translate([0, numCards * CARD_ANGLED_D + E, 0])
-        rotate([180 - ANGLE, 0, 0])
+        rotate([ANGLE + 90, 0, 0])
         cube([INNER_W, CARD_D * (numCards * CARD_ANGLED_D + E) / CARD_ANGLED_D, INNER_W]);
 
         union() {
@@ -542,7 +541,7 @@ module holder(i) {
       };
 
       translate([0, numCards * CARD_ANGLED_D + E, 0])
-      card_divider();
+      card_divider(ITEMS[i][P_CH_INITIALS]);
     };
 
     if (clipFront) {
@@ -552,23 +551,32 @@ module holder(i) {
   };
 }
 
-module card_divider() {
-  // Card divider.
-  translate([INNER_W, 0, 0])
-  rotate([0, 0, 180])
+module card_divider(initials = []) {
+  divBackY = DIV_H / tan(ANGLE);
+  divBackH = DIV_D * tan(ANGLE);
+  divLen = DIV_H / sin(ANGLE);
+
+  xOff = DIV_D / 3;
+  controlYOff = xOff * tan(ANGLE);
+  smoothPoints = bezPoints([0, 0], [xOff, controlYOff], [xOff, divBackH + controlYOff], [0, divBackH]);
+
+  // The smooth top additional length.
+  smoothLen = max([for (p = smoothPoints) (p.y - divBackH) * sin(ANGLE) + p.x * cos(ANGLE)]);
+
   difference() {
     union() {
-      // Point image: https://photos.app.goo.gl/Lu6kYR7UExFjoFv78
+      // Simplest card divider.
       polyhedron(
+        // Point image: https://photos.app.goo.gl/Lu6kYR7UExFjoFv78
         points = [
           [0, 0, 0], // 0
-          [0, -DIV_BACK_Y, DIV_H], // 1
-          [0, -DIV_BACK_Y, DIV_BACK_BOT_Z], // 2
-          [0, -DIV_D , 0], // 3
+          [0, divBackY, DIV_H], // 1
+          [0, divBackY, DIV_H - divBackH], // 2
+          [0, DIV_D , 0], // 3
           [INNER_W, 0, 0], // 4
-          [INNER_W, -DIV_D , 0], // 5
-          [INNER_W, -DIV_BACK_Y, DIV_BACK_BOT_Z], // 6
-          [INNER_W, -DIV_BACK_Y, DIV_H], // 7
+          [INNER_W, DIV_D , 0], // 5
+          [INNER_W, divBackY, DIV_H - divBackH], // 6
+          [INNER_W, divBackY, DIV_H], // 7
         ],
         faces = [
           [0, 1, 2, 3],
@@ -579,43 +587,43 @@ module card_divider() {
           [0, 3, 5, 4],
         ]);
 
-      // Card divider end cap.
-      translate([0, -DIV_BACK_Y, DIV_BACK_BOT_Z + DIV_CAP_R])
-      scale([1, .53, 1.04757])
-      difference() {
-        shearAlongZ([0, -.3, 1])
-        rotate([0, 90, 0])
-        cylinder(INNER_W, DIV_CAP_R, DIV_CAP_R);
-
-        // What is this for?
-        rotate([0, 90, 0])
-        translate([-DIV_CAP_R*1.25, 0, -1])
-        cube([DIV_CAP_R * 2.5, DIV_CAP_R * 1.5, INNER_W * 2]);
-      };
+      // Smooth top edge
+      translate([0, divBackY, DIV_H - divBackH])
+      rotate([90, 0, 90])
+      linear_extrude(height = INNER_W)
+      polygon(points = smoothPoints);
     };
 
-    // I want to move this up a bit...
-    // Divider hole. 2.373
-    translate([0, -DIV_D*2.3776, SPILL_Z])
-    rotate([ANGLE - 90, 0, 0])
-    difference() {
+    union() {
+      if (len(initials) > 0) {
+        sideW = (INNER_W - HOLE_W) / 2;
+        textSize = .8 * sideW;
+        textGap = cos(ANGLE) * 1.3;
+        textIndent = 1;
+
+        translate([sideW / 2, divBackY, DIV_H - textIndent])
+        shearText(ANGLE)
+        scale([1, cos(ANGLE), 1])
+        linear_extrude(10)
+        for(i = [0 : len(initials) - 1]) {
+          scale([len(initials[i]) > 1 ? .73 : 1, 1])
+          translate([0, -textGap -i * (textGap + textSize)])
+          text(initials[i], size = textSize, halign = "center", valign = "top", font = "Lucida Sans Typewriter:style=Bold");
+        }
+      }
+
+      divSmoothedLen = divLen + smoothLen + .01;
+      holeH = divSmoothedLen * HOLE_SCALE_H;
+      rotate([ANGLE, 0, 0])
+      translate([(INNER_W - HOLE_W) / 2, divSmoothedLen - holeH, -HOLE_W / 2])
       union() {
-        translate([(INNER_W - HOLE_W) / 2, -DIV_L, 0])
-        cube([HOLE_W, DIV_L, DIV_D]);
+        oneSideRoundedCube(HOLE_W, holeH, HOLE_W, HOLE_R);
 
-        translate([INNER_W - (INNER_W - HOLE_W) / 2 -.0001, -DIV_L, 0])
-        cylCap(DIV_D, TOP_R, 0);
+        translate([HOLE_W, holeH - TOP_R, 0])
+        cylCap(HOLE_W, TOP_R, 270);
 
-        translate([(INNER_W - HOLE_W) / 2-TOP_R, -DIV_L, 0])
-        cylCap(DIV_D, TOP_R, 90);
-      };
-
-      union() {
-        translate([(INNER_W - HOLE_W) / 2, -HOLE_R, 0])
-        cylCap(DIV_D, HOLE_R, 270);
-
-        translate([INNER_W - (INNER_W - HOLE_W) / 2 - HOLE_R, -HOLE_R, 0])
-        cylCap(DIV_D, HOLE_R, 180);
+        translate([-TOP_R, holeH - TOP_R, 0])
+        cylCap(HOLE_W, TOP_R, 180);
       };
     };
   };
@@ -631,6 +639,14 @@ module cylCap(h, r, a) {
     translate([0, 0, - h * .5])
     cylinder(h * 2, r, r);
   };
+}
+
+module shearText(ang) {
+  t = tan(ang);
+  multmatrix([[1, 0, 0, 0],
+              [0, 1, 0, 0],
+              [0, t, 1, 0]])
+  children();
 }
 
 /**
@@ -730,13 +746,4 @@ module grippyBowlHolder(w, d, h, or = 7) {
 
     cube([w, d, botClipH]);
   };
-}
-
-module shearAlongZ(p) {
-  multmatrix([
-    [1, 0, p.x / p.z, 0],
-    [0, 1, p.y / p.z, 0],
-    [0, 0, 1,         0]
-  ])
-  children();
 }

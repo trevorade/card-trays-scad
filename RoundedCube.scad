@@ -11,7 +11,15 @@ slotH = 84;
 slotClipW = 20;// MAT_D * 5;
 smoothR = 10;
 
-roundedSlot(slotW, slotD, slotH, slotA, smoothR, slotClipW);
+sideRoundedCube(20, 20, 20, 5);
+
+translate([0, 25, 0])
+oneSideRoundedCube(20, 20, 20, 5);
+
+translate([25, 0, 0])
+oneSideRoundedCube(20, 20, 20, 5);
+
+//roundedSlot(slotW, slotD, slotH, slotA, smoothR, slotClipW);
 
 function roundedSlotW(slotW, slotH, slotA) = slotH / tan(slotA) + slotW / cos(90 - slotA);
 
@@ -87,6 +95,35 @@ module sideRoundedCube(w, d, h, r) {
 
     cylinder(h = r, r = r, center = true);
   };
+}
+
+// Top, bottom, and back are flat.
+module oneSideRoundedCube(w, d, h, r) {
+  minkowski() {
+    translate([r, r, r / 2])
+    cube([w - r * 2, d - r, h - r]);
+
+    difference() {
+      cylinder(h = r, r = r, center = true);
+
+      translate([-r*2, 0, -r*2])
+      cube([r*4, r*4, r*4]);
+    }
+  };
+  
+//  union() {
+//    translate([0, r, 0])
+//    cube([w, d - r, h]);
+//
+//    translate([r, 0, 0])
+//    cube([w - r*2, r, h]);
+//
+//    translate([r, r, 0])
+//    cylinder(h = h, r = r);
+//
+//    translate([w - r, r, 0])
+//    cylinder(h = h, r = r);
+//  };  
 }
 
 // Top is flat.
