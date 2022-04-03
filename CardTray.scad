@@ -23,17 +23,18 @@ SEASIDE_2E = 13;
 // Export STL settings.
 
 // Which expansion to export.
-EXPANSION = RENAISSANCE;
+EXPANSION = DARK_AGES;
 // Which tray to print (1-4).
-TRAY = 1;
-// Only models the front half of the tray. Model the back with `false`. Model
-// all with `undef`.
-ONLY_FRONT = true;
-// Only models a single bucket corresponding to an item index (starting with 0).
+TRAY = 4;
+// What part of the model to print.
+PRINT = "front";  // "all", "front", "back"
+// Only models a single bucket corresponding to an item index (starting with 1).
 // `false` to print the tray as per normal
 ONLY_BUCKET = false;
+// Whether the card holders should engrave identifying text for card piles.
+ENGRAVE_CARD_HOLDER_TEXT = true;
 // Overall quality. Use 36 or higher when rendering before exporting the STL.
-$fn = 18;
+$fn = 36;
 
 
 // Global object settings.
@@ -59,9 +60,9 @@ INNER_R = 3;
 // Card-holder angle.
 ANGLE = 39;
 // Total tray width. 72 is used for Dominion trays.
-TOTAL_W = 72;
+TOTAL_W = 72 - 1/4;
 // Total tray depth. 288 is used for Dominion trays.
-TOTAL_D = 288;
+TOTAL_D = 288 - 1/2;
 
 // Vertical gap between top of wall and top of card divider.
 DIV_GAP_H = 1.8;
@@ -70,7 +71,7 @@ DIV_D = 6;
 // Divider hole radius.
 HOLE_R = 12;
 // The divider hole width in relation to the total divider width
-HOLE_SCALE_W = .66;
+HOLE_SCALE_W = .59;
 // The divider hole height in relation to the angled divider height
 HOLE_SCALE_H = .71;
 // The divider hole rounded corner radius at the top.
@@ -108,7 +109,7 @@ P_I_TYPE = 0;
 P_I_SPLIT_AFTER = 1;
 
 // Makes an item trigger a split after it.
-function splitAfter(item) =
+function splitBefore(item) =
   concat(item[P_I_TYPE], true, [for (i = [2 : len(item)]) item[i]]);
 
 // Item Card Holder
@@ -231,11 +232,56 @@ EXPANSION_TRAY_ITEMS = [
   undef, // HINTERLANDS tray 3
   undef, // HINTERLANDS tray 4
   // DARK_AGES tray 1
-  [iCH(12), iCH(10), iCH(11), iCH(10), iCH(10), iCH(10), splitAfter(iCH(10)), iCH(10), iCH(10), iCH(10), iCH(10)],
+  [
+    iCH(10, ["Al"]),
+    iCH(10, ["Ar"]),
+    iCH(10, ["BM"]),
+    iCH(10, ["BC"]),
+    iCH(10, ["Be"]),
+    splitBefore(iCH(10, ["Ca"])),
+    iCH(10, ["Co"]),
+    iCH(10, ["Co"]),
+    iCH(10, ["Cu"]),
+    iCH(10, ["DC"]),
+    iCH(12, ["Fe"]),
+  ],
   // DARK_AGES tray 2
-  [iCH(10), iCH(10), iCH(11), iCH(10), iCH(10), splitAfter(iCH(10)), iCH(20), iCH(10), iCH(10), iCH(10)],
-  undef, // DARK_AGES tray 3
-  undef, // DARK_AGES tray 4
+  [
+    iCH(10, ["Fo"]),
+    iCH(10, ["Fo"]),
+    iCH(10, ["G"]),
+    iCH(20, ["He", "M"]),
+    splitBefore(iCH(10, ["HG"])),
+    iCH(10, ["I"]),
+    iCH(10, ["JD"]),
+    iCH(10, ["K"]),
+    iCH(10, ["Ma"]),
+    iCH(10, ["MS"]),
+  ],
+  // DARK_AGES tray 3
+  [
+    iCH(10, ["My"]),
+    iCH(10, ["Pi"]),
+    iCH(10, ["PH"]),
+    iCH(10, ["Pr"]),
+    splitBefore(iCH(20, ["Ra"])),
+    iCH(10, ["Re"]),
+    iCH(10, ["Ro"]),
+    iCH(10, ["Sa"]),
+    iCH(10, ["Sc"]),
+    iCH(10, ["Sq"]),
+    iCH(10, ["St"]),
+  ],
+  // DARK_AGES tray 4
+  [
+    iCH(20, ["U", "M"]),
+    iCH(10, ["V"]),
+    iCH(10, ["WM"]),
+    splitBefore(iCH(35, ["Ra"])),
+    iCH(15, ["Sp"]),
+    iCH(18, ["Sh"]),
+    iCH(50, ["Ru"]),
+  ],
   undef, // GLDS_AND_CRNCP tray 1
   undef, // GLDS_AND_CRNCP tray 2
   undef, // GLDS_AND_CRNCP tray 3
@@ -244,29 +290,146 @@ EXPANSION_TRAY_ITEMS = [
   undef, // ADVENTURES tray 2
   undef, // ADVENTURES tray 3
   undef, // ADVENTURES tray 4
-  undef, // EMPIRES tray 1
-  undef, // EMPIRES tray 2
-  undef, // EMPIRES tray 3
-  undef, // EMPIRES tray 4
+  // EMPIRES tray 1
+  [
+    iCH(10, ["A"]),
+    iCH(10, ["Ca"]),
+    iCH(12, ["Ca"]),
+    iCH(10, ["Ca", "R"]),
+    splitBefore(iCH(10, ["CR"])),
+    iCH(10, ["Ch"]),
+    iCH(10, ["CQ"]),
+    iCH(10, ["Cr"]),
+    iCH(10, ["E", "P"]),
+    iCH(10, ["En"]),
+  ],
+  // EMPIRES tray 2
+  [
+    iCH(10, ["En"]),
+    iCH(10, ["FM"]),
+    iCH(10, ["FM"]),
+    iCH(10, ["G", "F"]),
+    splitBefore(iCH(10, ["G"])),
+    iCH(10, ["L"]),
+    iCH(10, ["O"]),
+    iCH(10, ["P", "E"]),
+    iCH(10, ["RB"]),
+    iCH(10, ["S"]),
+  ],
+  // EMPIRES tray 3
+  [
+    iCH(10, ["S", "BV"]),
+    iCH(10, ["T"]),
+    iCH(10, ["V"]),
+    iCH(10, ["WH"]),
+    splitBefore(iCH(24)),
+    iCH(24, ["R"]),
+    iCH(21, ["L"]),
+    iCH(13, ["E"]),
+  ],
+  // EMPIRES tray 4
+  [
+    iTB(45, 45, 23),
+    iTB(45, 45, 23),
+    splitBefore(iTB(45, 45, 23)),
+    iTB(45, 45, 23),
+  ],
   undef, // NOCTURNE tray 1
   undef, // NOCTURNE tray 2
   undef, // NOCTURNE tray 3
   undef, // NOCTURNE tray 4
   // RENAISSANCE tray 1
-  [iCH(10, ["A", "T"]), iCH(12, ["B", "G", "H", "L"]), iCH(10, ["C", "S"]), iCH(10, ["D"]), splitAfter(iCH(10, ["E"])), iCH(11, ["F", "B", "F"]), iCH(10, ["H"]), iCH(10, ["Im"]), iCH(10, ["In"]), iCH(10, ["L"])],
+  [
+    iCH(10, ["AT"]),
+    iCH(12, ["BG", "H", "L"]),
+    iCH(10, ["CS"]),
+    iCH(10, ["D"]),
+    splitBefore(iCH(10, ["E"])),
+    iCH(11, ["FB", "F"]),
+    iCH(10, ["H"]),
+    iCH(10, ["Im"]),
+    iCH(10, ["In"]),
+    iCH(10, ["L"]),
+  ],
   // RENAISSANCE tray 2
-  [iCH(10), iCH(10), iCH(10), iCH(10), iCH(10), splitAfter(iCH(10)), iCH(10), iCH(10), iCH(10), iCH(10)],
-  undef, // RENAISSANCE tray 3
+  [
+    iCH(10, ["MV"]),
+    iCH(10, ["OW"]),
+    iCH(10, ["Pa"]),
+    iCH(10, ["Pr"]),
+    splitBefore(iCH(10, ["Re"])),
+    iCH(10, ["Re"]),
+    iCH(10, ["Sc"]),
+    iCH(10, ["Sc"]),
+    iCH(10, ["Sc"]),
+    iCH(10, ["Se"]),
+  ],
+  // RENAISSANCE tray 3
+  [
+    iCH(10, ["SM"]),
+    iCH(10, ["Sp"]),
+    iCH(11, ["Sw", "TC"]),
+    iCH(11, ["T", "K"]),
+    iCH(10, ["V"]),
+    splitBefore(iCH(25)), // Empty Gap
+    iCH(25, ["R"]),
+    iCH(20, ["P"]),
+  ],
   // RENAISSANCE tray 4
-  [splitAfter(iMH(84, 7/6, 127, 6)), iTB(60, 40, 25), iTB(60, 40, 25)],
+  [
+    iTB(50, 40, 20),  // Cubes
+    iTB(60, 40, 23),  // Coins
+    splitBefore(iMH(84, 7/6, 127, 6)), // Mats
+  ],
   undef, // MENAGERIE tray 1
   undef, // MENAGERIE tray 2
   undef, // MENAGERIE tray 3
   undef, // MENAGERIE tray 4
-  undef, // ALLIES tray 1
-  undef, // ALLIES tray 2
-  undef, // ALLIES tray 3
-  undef, // ALLIES tray 4
+  // ALLIES tray 1
+  [
+    iCH(10, ["Ba"]),
+    iCH(10, ["Ba"]),
+    iCH(10, ["Br"]),
+    iCH(10, ["CC"]),
+    splitBefore(iCH(10, ["Ca"])),
+    iCH(10, ["Co"]),
+    iCH(10, ["Co"]),
+    iCH(10, ["E"]),
+    iCH(10, ["Ga"]),
+    iCH(10, ["Gu"]),
+    iCH(10, ["Hi"]),
+  ],
+  // ALLIES tray 2
+  [
+    iCH(10, ["Hu"]),
+    iCH(10, ["Im"]),
+    iCH(10, ["In"]),
+    iCH(10, ["Ma"]),
+    splitBefore(iCH(10, ["MC"])),
+    iCH(10, ["Mo"]),
+    iCH(10, ["RG"]),
+    iCH(10, ["Se"]),
+    iCH(10, ["Sk"]),
+    iCH(10, ["Sp"]),
+    iCH(10, ["Sw"]),
+  ],
+  // ALLIES tray 3
+  [
+    iCH(10, ["Sy"]),
+    iCH(10, ["T"]),
+    iCH(10, ["U"]),
+    splitBefore(iCH(16, ["A"])),
+    iCH(16, ["C"]),
+    iCH(16, ["F"]),
+    iCH(16, ["O"]),
+    iCH(16, ["T"]),
+    iCH(16, ["W"]),
+  ],
+  // ALLIES tray 4
+  [
+    iCH(31, ["R"]),
+    iCH(23, ["A"]),
+  ],
   undef, // SEASIDE_2E tray 1
   undef, // SEASIDE_2E tray 2
   undef, // SEASIDE_2E tray 3
@@ -280,54 +443,6 @@ assert(EXPANSION_TRAY_ITEMS != undef, str(
 // We use front to back when rendering...
 function reverse(list) = [for (i = [len(list)-1:-1:0]) list[i]];
 ITEMS = reverse(EXPANSION_TRAY_ITEMS);
-
-
-// Renaissance Globals
-//MIN_BACK_GAP = 80; // Ensures finger access for cards in back.
-//FIRST_WALL_D = WALL_D; // Plenty of space in this expansion.
-
-// Renaissance col 1 + 2
-//SPLIT_AFTER = 6; // Split the thing in half after this many.
-//E = 4.51576; // Extra
-//HOLDERS = [10 + E, 10 + E, 10 + E, 10 + E, 10 + E, 10 + E, 10 + E, 10 + E, 10 + E, 10 + E];
-
-// Renaissance col 3
-//SPLIT_AFTER = 4; // Split the thing in half after this many.
-//E = 4.51576; // Extra
-//HOLDERS = [20 + E, 25 + E, 10 + E, 10 + E, 10 + E, 10 + E, 10 + E];
-
-// Renaissance col 4
-//SPECIAL = "renaissance";
-//SPLIT_AFTER = 1; // Split the thing in half after this many.
-//E = 0; // Extra
-//HOLDERS = [140, 10];
-
-// Dark Ages Globals
-//FIRST_WALL_D = .4 * 3;
-//MIN_BACK_GAP = 75.5; // Ensures finger access for cards in back. DON'T GO SMALLER than 75.5!
-
-// Dark ages col 1
-//SPLIT_AFTER = 6; // Split the thing in half after this many.
-//E = 3.036114; // Extra
-//ITEMS = [
-//  iCH(12), iCH(10), iCH(11), iCH(10), iCH(10), splitAfter(iCH(10)),
-//  iCH(10), iCH(10), iCH(10), iCH(10), iCH(10)];
-//HOLDERS = [12 + E, 10 + E, 11 + E, 10 + E, 10 + E, 10 + E, 10 + E, 10 + E, 10 + E, 10 + E, 10 + E];
-
-// Dark ages col 2
-//SPLIT_AFTER = 6; // Split the thing in half after this many.
-//E = 4.11183; // Extra
-//HOLDERS = [10 + E, 10 + E, 11 + E, 10 + E, 10 + E, 10 + E, 20 + E, 10 + E, 10 + E, 10 + E];
-
-// Dark ages col 3
-//SPLIT_AFTER = 6; // Split the thing in half after this many.
-//E = 2.36487; // Extra
-//HOLDERS = [10 + E, 10 + E, 10 + E, 10 + E, 10 + E, 10 + E, 20 + E, 10 + E, 10 + E, 10 + E, 10 + E];
-
-// Dark ages col 4
-//SPLIT_AFTER = 4; // Split the thing in half after this many.
-//E = 1.61166; // Extra
-//HOLDERS = [50 + E, 18 + E, 15 + E, 35 + E, 10 + E, 10 + E, 20 + E];
 
 // At this time, only all-cards or all other stuff are supported
 ALL_CARDS = ITEMS[0][P_I_TYPE] == I_CARD_HOLDER;
@@ -343,6 +458,8 @@ E =
     (TOTAL_D - WALL_D * 2 - INNER_R * 2 - recursiveItemDepth(0)) / len(ITEMS);
 assert(E >= 0, str(
   "Too many/deep items defined for EXPANSION = ", EXPANSION, ", TRAY = ", TRAY));
+
+echo("Extra space for items: ", E);
 
 if (ONLY_BUCKET == false) {
   difference() {
@@ -424,7 +541,7 @@ if (ONLY_BUCKET == false) {
     };
 
     // Splits the thing in half.
-    if (ONLY_FRONT == true || ONLY_FRONT == false) {
+    if (PRINT == "front" || PRINT == "back") {
       splitIndex = getSplitIndex();
       splitY = FIRST_WALL_D + getDepthToIndex(splitIndex) + (splitIndex + 1) * E;
 
@@ -440,10 +557,8 @@ if (ONLY_BUCKET == false) {
     }
   };
 } else {
-  card_divider();
-  
-//  item = ITEMS[ONLY_BUCKET];
-//  grippy_bowl(item[P_TB_W], item[P_TB_D], item[P_TB_H]);
+  item = ITEMS[len(ITEMS) - ONLY_BUCKET];
+  grippy_bowl(item[P_TB_W], item[P_TB_D], item[P_TB_H]);
 }
 
 // Iterative calculation of the necessary mat angle starting with a guess.
@@ -485,7 +600,7 @@ module recusiveModelItem(i) {
 }
 
 module maybe_invert() {
-  if (ONLY_FRONT) {
+  if (PRINT == "front") {
     difference() {
       cube([TOTAL_W, TOTAL_D, TOTAL_H]);
       children();
@@ -496,7 +611,7 @@ module maybe_invert() {
 }
 
 module holderMask() {
-  topCardsZ = 6.5 * CARD_D * sin(ANGLE);
+  topCardsZ = 8.8 * CARD_D * sin(ANGLE);
   topCardsY = TOTAL_H * tan(90 - ANGLE) - topCardsZ / tan(ANGLE);
 
   difference() {
@@ -595,9 +710,9 @@ module card_divider(initials = []) {
     };
 
     union() {
-      if (len(initials) > 0) {
+      if (ENGRAVE_CARD_HOLDER_TEXT && len(initials) > 0) {
         sideW = (INNER_W - HOLE_W) / 2;
-        textSize = .8 * sideW;
+        textSize = .76 * sideW;
         textGap = cos(ANGLE) * 1.3;
         textIndent = 1;
 
@@ -605,9 +720,10 @@ module card_divider(initials = []) {
         shearText(ANGLE)
         scale([1, cos(ANGLE), 1])
         linear_extrude(10)
+        translate([0, -textGap * 1.75])
         for(i = [0 : len(initials) - 1]) {
           scale([len(initials[i]) > 1 ? .73 : 1, 1])
-          translate([0, -textGap -i * (textGap + textSize)])
+          translate([0, -i * (textGap + textSize)])
           text(initials[i], size = textSize, halign = "center", valign = "top", font = "Lucida Sans Typewriter:style=Bold");
         }
       }
