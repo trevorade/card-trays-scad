@@ -23,11 +23,11 @@ SEASIDE_2E = 13;
 // Export STL settings.
 
 // Which expansion to export.
-EXPANSION = DARK_AGES;
+EXPANSION = BASE_2E;
 // Which tray to print (1-4).
-TRAY = 4;
+TRAY = 3;
 // What part of the model to print.
-PRINT = "front";  // "all", "front", "back"
+PRINT = "all";  // "all", "front", "back"
 // Only models a single bucket corresponding to an item index (starting with 1).
 // `false` to print the tray as per normal
 ONLY_BUCKET = false;
@@ -211,10 +211,52 @@ FIRST_WALL_D = [
 
 // Items that will be included in the model tray. Back to front.
 EXPANSION_TRAY_ITEMS = [
-  undef, // BASE_2E tray 1
-  undef, // BASE_2E tray 2
-  undef, // BASE_2E tray 3
-  undef, // BASE_2E tray 4
+  // BASE_2E tray 1
+  [
+    iCH(10, ["A"]),
+    iCH(10, ["Ba"]),
+    iCH(10, ["Bu"]),
+    iCH(10, ["Ce"]),
+    splitBefore(iCH(10, ["Ch"])),
+    iCH(10, ["CR"]),
+    iCH(10, ["F"]),
+    iCH(12, ["G"]),
+    iCH(10, ["H"]),
+    iCH(10, ["La"]),
+  ],
+  // BASE_2E tray 2
+  [
+    iCH(10, ["Li"]),
+    iCH(10, ["Ma"]),
+    iCH(10, ["Me"]),
+    iCH(10, ["Mi"]),
+    splitBefore(iCH(10, ["Mi"])),
+    iCH(10, ["Mo"]),
+    iCH(10, ["Mo"]),
+    iCH(10, ["P"]),
+    iCH(10, ["R"]),
+    iCH(10, ["Se"]),
+  ],
+  // BASE_2E tray 3
+  [
+    iCH(10, ["Sm"]),
+    iCH(10, ["TR"]),
+    iCH(10, ["Va"]),
+    iCH(10, ["Vi"]),
+    iCH(10, ["Wi"]),
+    iCH(10, ["Wo"]),
+    splitBefore(iCH(12, ["P"])),
+    iCH(12, ["D"]),
+    iCH(24, ["E"]),
+  ],
+  // BASE_2E tray 4
+  [
+    iCH(24, ["Ra"]),
+    iCH(30, ["Cu"]),
+    splitBefore(iCH(30, ["G"])),
+    iCH(40, ["S"]),
+    iCH(60, ["C"]),
+  ],
   undef, // INTRIGUE_2E tray 1
   undef, // INTRIGUE_2E tray 2
   undef, // INTRIGUE_2E tray 3
@@ -307,7 +349,7 @@ EXPANSION_TRAY_ITEMS = [
   [
     iCH(10, ["En"]),
     iCH(10, ["FM"]),
-    iCH(10, ["FM"]),
+    iCH(10, ["Fo"]),
     iCH(10, ["G", "F"]),
     splitBefore(iCH(10, ["G"])),
     iCH(10, ["L"]),
@@ -457,7 +499,7 @@ E =
     (TOTAL_D - FIRST_WALL_D - recursiveItemDepth(0) - MIN_BACK_GAP) / len(ITEMS) :
     (TOTAL_D - WALL_D * 2 - INNER_R * 2 - recursiveItemDepth(0)) / len(ITEMS);
 assert(E >= 0, str(
-  "Too many/deep items defined for EXPANSION = ", EXPANSION, ", TRAY = ", TRAY));
+  "Too many/deep items defined for EXPANSION = ", EXPANSION, ", TRAY = ", TRAY, ", E = ", E));
 
 echo("Extra space for items: ", E);
 
