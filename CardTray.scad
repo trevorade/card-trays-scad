@@ -23,9 +23,9 @@ SEASIDE_2E = 13;
 // Export STL settings.
 
 // Which expansion to export.
-EXPANSION = BASE_2E;
+EXPANSION = EMPIRES;
 // Which tray to print (1-4).
-TRAY = 3;
+TRAY = 4;
 // What part of the model to print.
 PRINT = "all";  // "all", "front", "back"
 // Only models a single bucket corresponding to an item index (starting with 1).
@@ -371,9 +371,9 @@ EXPANSION_TRAY_ITEMS = [
   ],
   // EMPIRES tray 4
   [
-    iTB(45, 55, 23), // Debt
+    iTB(58, 44, 23), // Debt
     iTB(47, 42.5, 23), // 1
-    splitBefore(iTB(40, 40, 23)), // 2
+    splitBefore(iTB(40, 40, 18)), // 2
     iTB(55, 45, 23), // 5
   ],
   undef, // NOCTURNE tray 1
