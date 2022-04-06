@@ -30,7 +30,7 @@ TRAY = 4;
 PRINT = "all";  // "all", "front", "back"
 // Only models a single bucket corresponding to an item index (starting with 1).
 // `false` to print the tray as per normal
-ONLY_BUCKET = false;
+ONLY_BUCKET = 1;
 // Whether the card holders should engrave identifying text for card piles.
 ENGRAVE_CARD_HOLDER_TEXT = true;
 // Overall quality. Use 36 or higher when rendering before exporting the STL.
@@ -372,7 +372,7 @@ EXPANSION_TRAY_ITEMS = [
   // EMPIRES tray 4
   [
     iTB(58, 44, 23), // Debt
-    iTB(47, 42.5, 23), // 1
+    iTB(47, 42.5, 20), // 1
     splitBefore(iTB(40, 40, 18)), // 2
     iTB(55, 45, 23), // 5
   ],
