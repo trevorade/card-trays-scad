@@ -371,10 +371,10 @@ EXPANSION_TRAY_ITEMS = [
   ],
   // EMPIRES tray 4
   [
-    iTB(45, 45, 23),
-    iTB(45, 45, 23),
-    splitBefore(iTB(45, 45, 23)),
-    iTB(45, 45, 23),
+    iTB(45, 55, 23), // Debt
+    iTB(47, 42.5, 23), // 1
+    splitBefore(iTB(40, 40, 23)), // 2
+    iTB(55, 45, 23), // 5
   ],
   undef, // NOCTURNE tray 1
   undef, // NOCTURNE tray 2
