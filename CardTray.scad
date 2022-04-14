@@ -23,14 +23,14 @@ SEASIDE_2E = 13;
 // Export STL settings.
 
 // Which expansion to export.
-EXPANSION = EMPIRES;
+EXPANSION = ALLIES;
 // Which tray to print (1-4).
-TRAY = 4;
+TRAY = 1;
 // What part of the model to print.
-PRINT = "all";  // "all", "front", "back"
+PRINT = "front";  // "all", "front", "back"
 // Only models a single bucket corresponding to an item index (starting with 1).
 // `false` to print the tray as per normal
-ONLY_BUCKET = 1;
+ONLY_BUCKET = false;
 // Whether the card holders should engrave identifying text for card piles.
 ENGRAVE_CARD_HOLDER_TEXT = true;
 // Overall quality. Use 36 or higher when rendering before exporting the STL.
@@ -62,7 +62,7 @@ ANGLE = 39;
 // Total tray width. 72 is used for Dominion trays.
 TOTAL_W = 72 - 1/4;
 // Total tray depth. 288 is used for Dominion trays.
-TOTAL_D = 288 - 1/2;
+TOTAL_D = 288 - 1/4;
 
 // Vertical gap between top of wall and top of card divider.
 DIV_GAP_H = 1.8;
@@ -81,7 +81,9 @@ TOP_R = 3;
 MIN_CARDS = 13;
 
 // Mat holder rounded edge size.
-MH_SMOOTH_R = 5;
+MH_SMOOTH_R = 3;
+// Mat holder cuts makes a slot for it to be easier to insert mats.
+MH_SLOT_CLIP = 8;
 // Mat holder padding inside the slot.
 MH_PAD = 1;
 
@@ -421,7 +423,7 @@ EXPANSION_TRAY_ITEMS = [
   [
     iTB(50, 40, 20),  // Cubes
     iTB(60, 40, 23),  // Coins
-    splitBefore(iMH(84, 7/6, 127, 6)), // Mats
+    splitBefore(iMH(84, 7.2/6, 127, 6)), // Mats
   ],
   undef, // MENAGERIE tray 1
   undef, // MENAGERIE tray 2
@@ -468,9 +470,15 @@ EXPANSION_TRAY_ITEMS = [
     iCH(16, ["W"]),
   ],
   // ALLIES tray 4
+  // Sorry. I didn't want to program support for mixing cards + other stuff so I
+  // just combined stuff in TinkerCad. I increased the total depth by 7mm for the
+  // coins + mats part.
   [
     iCH(31, ["R"]),
     iCH(23, ["A"]),
+    iCH(130, [""]),
+    //iTB(127, 22, 23),  // Coins
+    //splitBefore(iMH(84, 7.2/6, 127, 6)), // Mats
   ],
   undef, // SEASIDE_2E tray 1
   undef, // SEASIDE_2E tray 2
@@ -625,7 +633,8 @@ module recusiveModelItem(i) {
             item[P_MH_MAT_H] + 2 * MH_PAD,
             INNER_H + .05,
             mhAngle,
-            MH_SMOOTH_R);
+            MH_SMOOTH_R,
+            MH_SLOT_CLIP);
         } else if (item[P_I_TYPE] == I_TOKEN_BUCKET) {
           w = item[P_TB_W] + TB_PAD * 2;
           d = item[P_TB_D] + TB_PAD * 2;
